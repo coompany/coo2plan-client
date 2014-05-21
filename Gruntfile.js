@@ -25,6 +25,19 @@ module.exports = function (grunt) {
       dist: 'dist'
     },
 
+    // compile .less to .css using Recess
+    recess: {
+      dist: {
+        options: {
+          compile: true,
+          compress: false
+        },
+        files: {
+          '<%= yeoman.app %>/styles/main.css': ['<%= yeoman.app %>/styles/style.less']
+        }
+      }
+    },
+
     // Watches files for changes and runs tasks based on the changed files
     watch: {
       bower: {
@@ -45,6 +58,10 @@ module.exports = function (grunt) {
       styles: {
         files: ['<%= yeoman.app %>/styles/{,*/}*.css'],
         tasks: ['newer:copy:styles', 'autoprefixer']
+      },
+      less: {
+        files: ['<%= yeoman.app %>/styles/style.less'],
+        tasks: ['recess:dist', 'copy:styles', 'clean:style']
       },
       gruntfile: {
         files: ['Gruntfile.js']
@@ -125,7 +142,8 @@ module.exports = function (grunt) {
           ]
         }]
       },
-      server: '.tmp'
+      server: '.tmp',
+      style: '<%= yeoman.app %>/styles/main.css'
     },
 
     // Add vendor prefixed styles
@@ -146,8 +164,26 @@ module.exports = function (grunt) {
     // Automatically inject Bower components into the app
     bowerInstall: {
       app: {
-        src: ['<%= yeoman.app %>/index.html'],
-        ignorePath: '<%= yeoman.app %>/'
+        directory: '<%= yeoman.app %>/bower_components',
+        src: [
+          '<%= yeoman.app %>/index.html',
+          '<%= yeoman.app %>/styles/style.less'
+        ],
+        ignorePath: '<%= yeoman.app %>/',
+        fileTypes: {
+          less: {
+            block: /(([ \t]*)\/\/\s*bower:*(\S*))(\n|\r|.)*?(\/\/\s*endbower)/gi,
+            detect: {
+              css: /@import\s['"](.+)['"]/gi,
+              less: /@import\s['"](.+)['"]/gi
+            },
+            replace: {
+              css: '@import "{{filePath}}";',
+              less: '@import "{{filePath}}";'
+            }
+          }
+        },
+        exclude: [/bootstrap(\s*).css/]
       }
     },
 
@@ -350,7 +386,9 @@ module.exports = function (grunt) {
     grunt.task.run([
       'clean:server',
       'bowerInstall',
+      'recess:dist',
       'concurrent:server',
+      'clean:style',
       'autoprefixer',
       'connect:livereload',
       'watch'
@@ -365,6 +403,7 @@ module.exports = function (grunt) {
   grunt.registerTask('test', [
     'clean:server',
     'concurrent:test',
+    'clean:style',
     'autoprefixer',
     'connect:test',
     'karma'
@@ -373,8 +412,10 @@ module.exports = function (grunt) {
   grunt.registerTask('build', [
     'clean:dist',
     'bowerInstall',
+    'recess:dist',
     'useminPrepare',
     'concurrent:dist',
+    'clean:style',
     'autoprefixer',
     'concat',
     'ngmin',
