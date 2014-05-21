@@ -4,6 +4,33 @@
 // Manually import bootstrap due to a bug in grunt-wiredep... :(
 @import "../bower_components/bootstrap/less/bootstrap";
 
+@bg-color: darken(#fff, 3%);
+
 body {
-  background-color: seagreen;
+  background-color: @bg-color;
+  padding-top: 150px;
+
+  .navbar {
+    .navbar-header {
+      img {
+        max-width: 40px;
+      }
+    }
+    .nav {
+      .pull-right;
+      li {
+        a {
+          text-transform: uppercase;
+        }
+      }
+    }
+  }
+
+  .modal {
+    .modal-close {
+      text-align: right;
+      padding-bottom: 14px;
+      & > button.close { float: none; }
+    }
+  }
 }

@@ -3,7 +3,8 @@
 angular
   .module('coo2planClientApp', [
     'ngResource',
-    'ngRoute'
+    'ngRoute',
+    'ui.bootstrap'
   ])
   .config(function ($routeProvider) {
     $routeProvider
